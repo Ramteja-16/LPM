@@ -10,12 +10,19 @@ function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const controller = new AbortController();
+    
     const loadPopularMovies = async () => {
       try {
+         const timeout = setTimeout(() => controller.abort(), 8000);
+        
         const popularMovies = await getPopularMovies();
+        clearTimeout(timeout);
+        
         setMovies(popularMovies);
+        setError(null);
       } catch (err) {
-        console.log(err);
+        console.error("Fetch failed:", err);
         setError("Failed to load movies...");
       } finally {
         setLoading(false);
@@ -23,6 +30,8 @@ function Home() {
     };
 
     loadPopularMovies();
+
+    return () => controller.abort();
   }, []);
 
   const handleSearch = async (e) => {
